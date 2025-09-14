@@ -1,115 +1,357 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Pacientes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Asistencia</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width:700px; margin:auto; }
-    input, button { margin: 5px 0; padding:8px; }
-    .paciente { display:flex; justify-content:space-between; align-items:center;
-                padding:8px; border-bottom:1px solid #eee; }
-    .meta { color:#555; font-size:0.9em; }
-    .btn-eliminar { background:transparent; border:none; cursor:pointer; font-weight:bold; opacity:0.6; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #eaf4fc;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a4c7c;
+      margin-bottom: 20px;
+    }
+
+    .form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid #b3d4fc;
+      border-radius: 8px;
+      font-size: 1.1em;
+    }
+
+    .btn-agregar {
+      background-color: #3390e3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+
+    .paciente {
+      background-color: #f0f8ff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+
+    .paciente.asistio { background-color: #d9fdd3; }
+    .paciente.noasistio { background-color: #fdd3d3; }
+    .paciente.cambio { background-color: #fff3cd; }
+
+    .info {
+      color: #1a4c7c;
+      font-weight: bold;
+      font-size: 1.2em;
+      flex: 1;
+    }
+
+    .acciones {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .acciones button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 1em;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-asistencia { background-color: #3390e3; color: white; }
+    .btn-ver { background-color: #b0c4de; color: #1a4c7c; }
+
+    .btn-eliminar {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: transparent;
+      color: #888;
+      font-size: 1.2em;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-eliminar:hover { color: #e74c3c; }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .modal-content h3 { margin-bottom: 20px; color: #1a4c7c; }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .modal-buttons button {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+    }
+    .btn-asistio { background: #28a745; }
+    .btn-noasistio { background: #dc3545; }
+    .btn-cambio { background: #ffc107; color: black; }
+    .btn-cancelar { background: #6c757d; }
+
+    /* Modal grande para resumen */
+    .resumen-text {
+      text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-size: 1em;
+    }
   </style>
 </head>
 <body>
-  <h2>Agregar Paciente</h2>
-  <div>
-    <input id="nombre" placeholder="Nombre">
-    <input id="edad" placeholder="Edad" type="number" min="0" style="width:100px">
-    <input id="diagnostico" placeholder="Diagnóstico">
-    <button id="guardar">Guardar</button>
+  <div class="container">
+    <h2>Registro de Asistencia</h2>
+    <div class="form">
+      <input id="nombre" placeholder="Nombre del paciente" />
+      <button id="guardar" class="btn-agregar">Agregar</button>
+    </div>
+    <div id="lista"></div>
   </div>
-
-  <h2>Lista de Pacientes</h2>
-  <div id="lista"></div>
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Importar Firebase desde CDN (más fácil que instalar nada)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      deleteDoc,
+      doc,
+      query,
+      where,
+      getDocs,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // 🔹 Tu configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDyFzxJFKPQt5Ytke6vP6o33mlOEK-iGd0",
       authDomain: "pacienteswebfinal.firebaseapp.com",
       projectId: "pacienteswebfinal",
-      storageBucket: "pacienteswebfinal.firebasestorage.app",
+      storageBucket: "pacienteswebfinal.appspot.com",
       messagingSenderId: "421058444223",
       appId: "1:421058444223:web:b84d7e0d9944a1b78e7f0a"
     };
 
-    // Inicializar Firebase y Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const listaEl = document.getElementById('lista');
-    const nombreEl = document.getElementById('nombre');
-    const edadEl = document.getElementById('edad');
-    const diagEl = document.getElementById('diagnostico');
-    const guardarBtn = document.getElementById('guardar');
+    const listaEl = document.getElementById("lista");
+    const nombreEl = document.getElementById("nombre");
+    const guardarBtn = document.getElementById("guardar");
 
-    // Escuchar cambios en la colección "pacientes"
+    // Modal utilitario
+    function showModal(contentHTML) {
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.innerHTML = `<div class="modal-content">${contentHTML}</div>`;
+      document.body.appendChild(modal);
+      return modal;
+    }
+
     function renderizar() {
       const q = collection(db, "pacientes");
       onSnapshot(q, snapshot => {
         listaEl.innerHTML = "";
         if (snapshot.empty) {
-          listaEl.innerHTML = "<div class='meta'>No hay pacientes guardados.</div>";
+          listaEl.innerHTML = "<div>No hay pacientes guardados.</div>";
           return;
         }
         snapshot.forEach(docSnap => {
           const p = docSnap.data();
           const id = docSnap.id;
 
-          const row = document.createElement('div');
-          row.className = 'paciente';
+          const row = document.createElement("div");
+          row.className = "paciente";
 
-          const info = document.createElement('div');
-          info.innerHTML = `<strong>${p.nombre}</strong> <span class="meta">- ${p.edad} años - ${p.diagnostico}</span>`;
+          const info = document.createElement("div");
+          info.className = "info";
+          info.textContent = p.nombre;
 
-          const btn = document.createElement('button');
-          btn.className = 'btn-eliminar';
-          btn.title = 'Eliminar';
-          btn.textContent = '−';
-          btn.onclick = async () => {
-            if (confirm("¿Eliminar este paciente?")) {
+          const acciones = document.createElement("div");
+          acciones.className = "acciones";
+
+          const btnAsistencia = document.createElement("button");
+          btnAsistencia.className = "btn-asistencia";
+          btnAsistencia.textContent = "✓ Asistencia";
+          btnAsistencia.onclick = () => {
+            const modal = showModal(`
+              <h3>Marcar asistencia</h3>
+              <div class="modal-buttons">
+                <button class="btn-asistio">Asistió</button>
+                <button class="btn-noasistio">No asistió</button>
+                <button class="btn-cambio">Cambio de fecha</button>
+                <button class="btn-cancelar">Cancelar</button>
+              </div>
+            `);
+            modal.querySelector(".btn-asistio").onclick = async () => {
+              await guardarAsistencia(id, p.nombre, "asistió");
+              row.classList.add("asistio");
+              modal.remove();
+            };
+            modal.querySelector(".btn-noasistio").onclick = async () => {
+              await guardarAsistencia(id, p.nombre, "no asistió");
+              row.classList.add("noasistio");
+              modal.remove();
+            };
+            modal.querySelector(".btn-cambio").onclick = async () => {
+              await guardarAsistencia(id, p.nombre, "cambio de fecha");
+              row.classList.add("cambio");
+              modal.remove();
+            };
+            modal.querySelector(".btn-cancelar").onclick = () => modal.remove();
+          };
+
+          const btnVer = document.createElement("button");
+          btnVer.className = "btn-ver";
+          btnVer.textContent = "🔍 Ver";
+          btnVer.onclick = async () => {
+            const inicioMes = new Date();
+            inicioMes.setDate(1);
+            inicioMes.setHours(0, 0, 0, 0);
+
+            const q = query(collection(db, "asistencias"), where("pacienteId", "==", id));
+            const snapshot = await getDocs(q);
+
+            let total = 0;
+            let resumen = `Paciente: ${p.nombre}\nEdad: ${p.edad || "-"}\nCelular: ${p.celular || "-"}\n\nAsistencias del mes:\n`;
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              const fecha = data.fecha.toDate();
+              if (fecha >= inicioMes) {
+                total++;
+                resumen += `- ${fecha.toLocaleDateString()} → ${data.estado}\n`;
+              }
+            });
+            resumen += `\nTotal asistencias: ${total}`;
+
+            const modal = showModal(`
+              <h3>Resumen</h3>
+              <div class="resumen-text">${resumen}</div>
+              <div class="modal-buttons">
+                <button class="btn-cancelar">Cerrar</button>
+              </div>
+            `);
+            modal.querySelector(".btn-cancelar").onclick = () => modal.remove();
+          };
+
+          const btnEliminar = document.createElement("button");
+          btnEliminar.className = "btn-eliminar";
+          btnEliminar.textContent = "−";
+          btnEliminar.onclick = async () => {
+            if (confirm("¿Eliminar paciente?")) {
               await deleteDoc(doc(db, "pacientes", id));
             }
           };
 
+          acciones.appendChild(btnAsistencia);
+          acciones.appendChild(btnVer);
+
           row.appendChild(info);
-          row.appendChild(btn);
+          row.appendChild(acciones);
+          row.appendChild(btnEliminar);
           listaEl.appendChild(row);
         });
       });
     }
 
-    // Agregar paciente
+    async function guardarAsistencia(id, nombre, estado) {
+      await addDoc(collection(db, "asistencias"), {
+        pacienteId: id,
+        nombre,
+        fecha: Timestamp.now(),
+        estado
+      });
+    }
+
     async function agregarPaciente() {
       const nombre = nombreEl.value.trim();
-      const edad = edadEl.value.trim();
-      const diagnostico = diagEl.value.trim();
-      if (!nombre) {
-        alert("Ingrese un nombre.");
-        return;
-      }
-      await addDoc(collection(db, "pacientes"), {
-        nombre,
-        edad,
-        diagnostico
-      });
+      if (!nombre) { alert("Ingrese un nombre."); return; }
 
-      nombreEl.value = "";
-      edadEl.value = "";
-      diagEl.value = "";
+      const modal = showModal(`
+        <h3>Datos de ${nombre}</h3>
+        <input id="edad" placeholder="Edad (opcional)" type="number" min="0" />
+        <input id="celular" placeholder="Celular (opcional)" />
+        <div class="modal-buttons">
+          <button class="btn-cancelar">Cancelar</button>
+          <button class="btn-asistio">Guardar</button>
+        </div>
+      `);
+
+      modal.querySelector(".btn-cancelar").onclick = () => modal.remove();
+      modal.querySelector(".btn-asistio").onclick = async () => {
+        const edad = modal.querySelector("#edad").value.trim();
+        const celular = modal.querySelector("#celular").value.trim();
+        await addDoc(collection(db, "pacientes"), { nombre, edad, celular });
+        modal.remove();
+        nombreEl.value = "";
+      };
     }
 
     guardarBtn.addEventListener("click", agregarPaciente);
-
     renderizar();
   </script>
 </body>
