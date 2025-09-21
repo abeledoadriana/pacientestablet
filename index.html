@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #eaf4fc;
+      background-color: #f3f7fb;
       display: flex;
       justify-content: center;
       padding: 20px;
@@ -16,16 +16,16 @@
 
     .container {
       background-color: #ffffff;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 20px;
       width: 100%;
       max-width: 900px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
       text-align: center;
-      color: #1a4c7c;
+      color: #2a5d8f;
       margin-bottom: 20px;
     }
 
@@ -38,25 +38,27 @@
     input {
       flex: 1;
       padding: 14px;
-      border: 1px solid #b3d4fc;
-      border-radius: 8px;
+      border: 1px solid #c7dff6;
+      border-radius: 10px;
       font-size: 1.1em;
     }
 
     .btn-agregar {
-      background-color: #3390e3;
+      background-color: #2a7de1;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 14px 20px;
       font-weight: bold;
       cursor: pointer;
       font-size: 1.1em;
+      transition: 0.3s;
     }
+    .btn-agregar:hover { background-color: #1e66b3; }
 
     .paciente {
-      background-color: #f0f8ff;
-      border-radius: 12px;
+      background-color: #f0f6ff;
+      border-radius: 14px;
       padding: 16px;
       margin-bottom: 12px;
       display: flex;
@@ -67,12 +69,12 @@
       transition: background-color 0.3s;
     }
 
-    .paciente.asistio { background-color: #d9fdd3; }
-    .paciente.noasistio { background-color: #fdd3d3; }
-    .paciente.cambio { background-color: #fff3cd; }
+    .paciente.asistio { background-color: #e7f8e9; }
+    .paciente.noasistio { background-color: #fbe7e7; }
+    .paciente.cambio { background-color: #fff7e0; }
 
     .info {
-      color: #1a4c7c;
+      color: #2a5d8f;
       font-weight: bold;
       font-size: 1.2em;
       flex: 1;
@@ -92,8 +94,8 @@
       cursor: pointer;
     }
 
-    .btn-asistencia { background-color: #3390e3; color: white; }
-    .btn-ver { background-color: #b0c4de; color: #1a4c7c; }
+    .btn-asistencia { background-color: #2a7de1; color: white; }
+    .btn-ver { background-color: #d0e2f7; color: #2a5d8f; }
 
     .btn-eliminar {
       position: absolute;
@@ -111,7 +113,7 @@
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.4);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -119,26 +121,27 @@
     }
     .modal-content {
       background: white;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 20px;
-      max-width: 500px;
+      max-width: 520px;
       width: 90%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
       text-align: center;
+      animation: fadeIn 0.3s ease;
     }
-    .modal-content h3 { margin-bottom: 20px; color: #1a4c7c; }
+    .modal-content h3 { margin-bottom: 16px; color: #2a5d8f; }
 
     .modal-buttons {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
     .modal-buttons button {
-      padding: 14px 20px;
+      padding: 12px 18px;
       border: none;
       border-radius: 8px;
-      font-size: 1.1em;
+      font-size: 1em;
       cursor: pointer;
       font-weight: bold;
       color: white;
@@ -147,17 +150,39 @@
     .btn-noasistio { background: #dc3545; }
     .btn-cambio { background: #ffc107; color: black; }
     .btn-cancelar { background: #6c757d; }
+    .btn-modificar { background: #2a7de1; }
 
-    /* Modal grande para resumen */
-    .resumen-text {
+    /* Resumen */
+    .resumen-lista {
       text-align: left;
       max-height: 300px;
       overflow-y: auto;
-      background: #f9f9f9;
-      padding: 12px;
+      margin-bottom: 15px;
+    }
+    .resumen-item {
+      background: #f9fbfd;
+      padding: 10px;
       border-radius: 8px;
-      white-space: pre-wrap;
-      font-size: 1em;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95em;
+      color: #333;
+      border: 1px solid #e0e6f0;
+    }
+    .resumen-item button {
+      background: transparent;
+      border: none;
+      color: #dc3545;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    .resumen-item button:hover { color: #a71d2a; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
@@ -203,7 +228,6 @@
     const nombreEl = document.getElementById("nombre");
     const guardarBtn = document.getElementById("guardar");
 
-    // Modal utilitario
     function showModal(contentHTML) {
       const modal = document.createElement("div");
       modal.className = "modal";
@@ -246,19 +270,41 @@
                 <button class="btn-cambio">Cambio de fecha</button>
                 <button class="btn-cancelar">Cancelar</button>
               </div>
+              <div style="margin-top:15px;">
+                <input id="fechaManual" type="date" style="display:none;" />
+                <button class="btn-modificar">Modificar fecha</button>
+              </div>
             `);
+
+            let fechaVisible = false;
+
+            modal.querySelector(".btn-modificar").onclick = () => {
+              const input = modal.querySelector("#fechaManual");
+              fechaVisible = !fechaVisible;
+              input.style.display = fechaVisible ? "inline-block" : "none";
+            };
+
+            function getFechaSeleccionada() {
+              const inputFecha = modal.querySelector("#fechaManual").value;
+              if (inputFecha) {
+                const partes = inputFecha.split("-");
+                return Timestamp.fromDate(new Date(partes[0], partes[1]-1, partes[2]));
+              }
+              return Timestamp.now();
+            }
+
             modal.querySelector(".btn-asistio").onclick = async () => {
-              await guardarAsistencia(id, p.nombre, "asistió");
+              await guardarAsistencia(id, p.nombre, "asistió", getFechaSeleccionada());
               row.classList.add("asistio");
               modal.remove();
             };
             modal.querySelector(".btn-noasistio").onclick = async () => {
-              await guardarAsistencia(id, p.nombre, "no asistió");
+              await guardarAsistencia(id, p.nombre, "no asistió", getFechaSeleccionada());
               row.classList.add("noasistio");
               modal.remove();
             };
             modal.querySelector(".btn-cambio").onclick = async () => {
-              await guardarAsistencia(id, p.nombre, "cambio de fecha");
+              await guardarAsistencia(id, p.nombre, "cambio de fecha", getFechaSeleccionada());
               row.classList.add("cambio");
               modal.remove();
             };
@@ -277,24 +323,58 @@
             const snapshot = await getDocs(q);
 
             let total = 0;
-            let resumen = `Paciente: ${p.nombre}\nEdad: ${p.edad || "-"}\nCelular: ${p.celular || "-"}\n\nAsistencias del mes:\n`;
-            snapshot.forEach(doc => {
-              const data = doc.data();
-              const fecha = data.fecha.toDate();
-              if (fecha >= inicioMes) {
-                total++;
-                resumen += `- ${fecha.toLocaleDateString()} → ${data.estado}\n`;
-              }
-            });
-            resumen += `\nTotal asistencias: ${total}`;
+            let itemsHTML = "";
+            const clavesRegistradas = new Set();
+
+            const diasSemana = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+            const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","setiembre","octubre","noviembre","diciembre"];
+
+            // ordenar y filtrar duplicados
+            const asistencias = snapshot.docs
+              .map(d => ({ id: d.id, ...d.data(), fechaDate: d.data().fecha.toDate() }))
+              .filter(d => d.fechaDate >= inicioMes)
+              .sort((a,b) => a.fechaDate - b.fechaDate);
+
+            for (const data of asistencias) {
+              const fecha = data.fechaDate;
+              const clave = `${fecha.toDateString()}-${data.estado}`;
+              if (clavesRegistradas.has(clave)) continue;
+              clavesRegistradas.add(clave);
+
+              total++;
+              const diaSemana = diasSemana[fecha.getDay()];
+              const dia = fecha.getDate();
+              const mes = meses[fecha.getMonth()];
+              const anio = fecha.getFullYear();
+
+              itemsHTML += `
+                <div class="resumen-item">
+                  <span>${diaSemana} ${dia} de ${mes} de ${anio} → ${data.estado}</span>
+                  <button data-id="${data.id}">❌</button>
+                </div>
+              `;
+            }
 
             const modal = showModal(`
-              <h3>Resumen</h3>
-              <div class="resumen-text">${resumen}</div>
+              <h3>Resumen de ${p.nombre}</h3>
+              <div class="resumen-lista">
+                ${itemsHTML || "<em>No hay asistencias este mes</em>"}
+              </div>
+              <p style="font-size:1.3em; font-weight:bold; color:#2a7de1;">Total asistencias: ${total}</p>
               <div class="modal-buttons">
                 <button class="btn-cancelar">Cerrar</button>
               </div>
             `);
+
+            modal.querySelectorAll(".resumen-item button").forEach(btn => {
+              btn.onclick = async () => {
+                if (confirm("¿Eliminar esta asistencia?")) {
+                  await deleteDoc(doc(db, "asistencias", btn.dataset.id));
+                  modal.remove();
+                }
+              };
+            });
+
             modal.querySelector(".btn-cancelar").onclick = () => modal.remove();
           };
 
@@ -318,11 +398,11 @@
       });
     }
 
-    async function guardarAsistencia(id, nombre, estado) {
+    async function guardarAsistencia(id, nombre, estado, fecha) {
       await addDoc(collection(db, "asistencias"), {
         pacienteId: id,
         nombre,
-        fecha: Timestamp.now(),
+        fecha,
         estado
       });
     }
